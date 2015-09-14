@@ -5,8 +5,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+
+import com.cn.derek.crawler.downloader.DownloadPage;
 
 public class UrlUtils
 {
@@ -18,7 +24,8 @@ public class UrlUtils
 	private static Pattern pattern = Pattern.compile(pat);
 
 	private static BufferedWriter writer = null;
-
+    private static Logger logger = Logger.getLogger(UrlUtils.class.getName()) ;
+    
 	/**
 	 * 爬虫搜索深度
 	 */
@@ -34,18 +41,20 @@ public class UrlUtils
 	{
 		return url.split("/");
 	}
-    public static boolean isLegalUrl(String url){
-    	return true ;
-    }
+ 
 	/**
 	 * 判断该url是否是我们所要的url
 	 * @param url
 	 * @return
 	 */
-    public static boolean isWantedUrl(String url){
-		Matcher matcher = pattern.matcher(url);
-
-		return matcher.matches();
+    public static boolean isValidUrl(String url){
+		try{
+          URI uri = new URI(url) ;
+		}catch( URISyntaxException	e){
+		  logger.info("URISyntaxException:"+url, e);
+		  return false;
+		}
+		return true ;
     }
     /**
      * 替换一些url中的不合法字符
@@ -137,17 +146,32 @@ public class UrlUtils
 	{
 		/* 内外部链接最终转化为完整的链接格式 */
 		String resultHref = null;
-
+		href = href.trim() ;
+		if( href.contains("?") )
+		  if( !href.startsWith("?"))
+            href = href.split("\\?")[0] ;
+		  else
+			return "";
+		if( href.contains("#") )
+		  if( !href.contains("#"))
+             href = href.split("#")[0] ;
+		  else
+			  return "";
 		/* 判断是否为外部链接 */
 		if (href.startsWith("http://"))
 		{
 			resultHref = href;
-		} else
+		}else if( href.startsWith("https://") ){
+			resultHref = href ; 
+		}
+		else
 		{
 			/* 如果是内部链接,则补充完整的链接地址,其他的格式忽略不处理,如：a href="#" */
 			if (href.startsWith("/"))
 			{
-				resultHref = "http://www.oschina.net" + href;
+				resultHref = "http://news.baidu.com" + href;
+			}else{
+				resultHref = "http://" + href;
 			}
 		}
 

@@ -135,9 +135,9 @@ public class DownloadPage
 				.addInterceptorLast(httpResponseInterceptor)
 				.setRetryHandler(retryHandler)
 				.build() ;
+		String content = null;
 		HttpGet getHttp = new HttpGet(url);
 		getHttp.setConfig(requestConfig);
-		String content = null;
 
 		CloseableHttpResponse response=null;
 		try{
@@ -159,22 +159,27 @@ public class DownloadPage
 				}
 			}
 
-		} catch (ClientProtocolException e)
+		}catch( ConnectTimeoutException e){
+			logger.error(e.getMessage(), e);
+		}catch(UnknownHostException e){
+			logger.error("UnknownHostException:"+url,e);
+		}
+		catch (ClientProtocolException e)
 		{
 			e.printStackTrace();
-			logger.error( e.getMessage() );
+			logger.error( e.getMessage(), e );
 		} catch (IOException e)
 		{
 			e.printStackTrace();
-			logger.error( e.getMessage() );			
-		} finally
+			logger.error( e.getMessage(), e );			
+		}finally
 		{
 			//client.getConnectionManager().shutdown();
 			if(response != null )
 				response.close();
 			if( client != null)
 				client.close();
-
+              
 		}
 		return content;
 	}

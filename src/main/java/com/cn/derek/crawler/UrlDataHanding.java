@@ -29,7 +29,7 @@ public class UrlDataHanding implements Runnable
 				dataHanding(UrlQueue.outElem());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				logger.error( e.getMessage() );
+				logger.error( e.getMessage(), e );
 			}
 		}
 	}
